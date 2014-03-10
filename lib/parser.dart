@@ -1,9 +1,7 @@
-part of hub;
+part of lug;
 
-class _Hub{
+class _Lug{
 
-  var HUB_OPEN_SYMBOL = "<%";
-  var HUB_CLOSE_SYMBOL = "%>";
   Map _options = Config.options;
 
   Future render(String html, [String ogPath, Map req, Map options]){
@@ -27,46 +25,43 @@ class _Hub{
   tokenize(String html){
     List buffer = [];
     String stringBuf = "";
-    String hubBuf = "";
-    bool inHub = false;
+    String lugBuf = "";
+    bool inLug = false;
     bool doWrap = false;
-    _HubToken hubToken;
+
     var i=0;
     html = html.replaceAll(new RegExp(r'\n+'), '\\n');
     while(i<html.length){
-      if(i+HUB_OPEN_SYMBOL.length <= html.length && html.substring(i, i+HUB_OPEN_SYMBOL.length) == HUB_OPEN_SYMBOL){
-        if(inHub == true){
-          throw new Exception("Cannot open hub tag inside of hub block");
+      if(i+Config.LUG_OPEN_SYMBOL.length <= html.length && html.substring(i, i+Config.LUG_OPEN_SYMBOL.length) == Config.LUG_OPEN_SYMBOL){
+        if(inLug == true){
+          throw new Exception("Cannot open lug tag inside of lug block");
         } else{
-          i += HUB_OPEN_SYMBOL.length;
+          i += Config.LUG_OPEN_SYMBOL.length;
           if(html[i] == "="){
             i++;
             doWrap = true;
           }
-          inHub = true;
+          inLug = true;
           if(stringBuf.trim() != "")
             buffer.add("buffer.add('${stringBuf}');\n");
           stringBuf = "";
-          hubToken = new _HubToken();
-          //buffer.add(hubToken._currentToken);
         }
-      }else if(i+HUB_CLOSE_SYMBOL.length <= html.length && html.substring(i, i+HUB_CLOSE_SYMBOL.length) == HUB_CLOSE_SYMBOL && inHub){
-        inHub = false;
-        hubToken.add(hubBuf);
+      }else if(i+Config.LUG_CLOSE_SYMBOL.length <= html.length && html.substring(i, i+Config.LUG_CLOSE_SYMBOL.length) == Config.LUG_CLOSE_SYMBOL && inLug){
+        inLug = false;
         if(doWrap){
-          if(hubBuf.trim() != "")
-            buffer.add("buffer.add("+ hubBuf + ");\n");
+          if(lugBuf.trim() != "")
+            buffer.add("buffer.add("+ lugBuf + ");\n");
           doWrap = false;
         }
         else
-          if(hubBuf.trim() != "")
-            buffer.add(hubBuf+"\n");
-        hubBuf = "";
-        i += HUB_CLOSE_SYMBOL.length;
+          if(lugBuf.trim() != "")
+            buffer.add(lugBuf+"\n");
+        lugBuf = "";
+        i += Config.LUG_CLOSE_SYMBOL.length;
       }else{
 
-      if(inHub)
-        hubBuf += html[i];
+      if(inLug)
+        lugBuf += html[i];
       else
         stringBuf += html[i];
       i++;
@@ -74,8 +69,8 @@ class _Hub{
     }
     if(stringBuf.trim() != "")
       buffer.add("buffer.add('${stringBuf}');\n");
-    if(hubBuf.trim() != "")
-      throw new Exception("Unclosed hub tag");
+    if(lugBuf.trim() != "")
+      throw new Exception("Unclosed lug tag");
 
     return buffer;
   }
@@ -134,28 +129,6 @@ class _Hub{
   static String WRITETAIL = "  sendPort.send(\"\${buffer.join('')}\");\n"+
                             "}";
 
-
-}
-
-
-
-
-
-
-
-class _HubToken {
-  static int _tokenCount = 0;
-  static Map tokenValue = {};
-  int _currentToken;
-
-  _HubToken(){
-    _currentToken = _tokenCount;
-    _tokenCount++;
-  }
-
-  add(buff){
-    tokenValue[_currentToken] = buff;
-  }
 
 }
 

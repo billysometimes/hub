@@ -1,7 +1,7 @@
-name: hub
+name: lug
 version: 0.1.0
 author: Billy Welch
 description: Erb-style templates for dart
-homepage: https://github.com/billysometimes/hub
+homepage: https://github.com/billysometimes/lug
 environment:
   sdk: 1.2.0

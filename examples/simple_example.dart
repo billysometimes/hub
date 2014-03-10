@@ -1,10 +1,10 @@
-import '../bin/hub.dart' as Hub;
+import '../bin/lug.dart' as Lug;
 
 main(){
   String path = "simple_example";
 
   var req = {"users":[{"name":"billy","age":30},{"name":"sally","age":38},{"name":"bob","age":22}],"thatNum":4,"treasure":{"map":true}};
 
-  Hub.renderFile(path,req,{"cache":false}).then(
+  Lug.renderFile(path,req,{"cache":false}).then(
       (tmp)=>print(tmp));
 }
