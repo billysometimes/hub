@@ -10,7 +10,11 @@ part '../lib/config.dart';
 Future render(html,[path,req,options]) => new _Hub().render(html,path,req,options);
 
 Future renderFile(path,[req,options]) {
-  File f = new File(path);
-  String html = f.readAsStringSync(encoding: UTF8);
+  File f = new File(path+".html.hub");
+  String html;
+  if(f.existsSync())
+    html = f.readAsStringSync(encoding: UTF8);
+  else
+    html = "";
   return new _Hub().render(html,path,req,options);
   }

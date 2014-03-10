@@ -128,7 +128,7 @@ class _Hub{
   }
 
   static String WRITEHEAD = "import 'dart:isolate';\n" +
-                            "main(List<String>args,SendPort sendPort) {\n" +
+                            "main(List args,SendPort sendPort) {\n" +
                             "  List buffer = [];\n";
 
   static String WRITETAIL = "  sendPort.send(\"\${buffer.join('')}\");\n"+
