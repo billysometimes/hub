@@ -1,4 +1,7 @@
-name: hub2
-description: A sample command-line application
-#dev_dependencies:
-#  unittest: any
+name: hub
+version: 0.1.0
+author: Billy Welch
+description: Erb-style templates for dart
+homepage: https://github.com/billysometimes/hub
+environment:
+  sdk: 1.2.0
