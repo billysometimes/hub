@@ -8,7 +8,7 @@ main(){
      Map params = request.uri.queryParameters;
      String path = request.uri.path.substring(1);
      Lug lug = new Lug();
-     lug.renderFile(path, params, {"cache":false}).then((res){
+     lug.render(path, params, {"cache":false}).then((res){
        request.response.write(res);
        request.response.close();
      });

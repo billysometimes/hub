@@ -8,9 +8,9 @@ part 'src/parser.dart';
 part 'src/config.dart';
 
 class Lug{
-  Future render(html,[path,req,options]) => new _Lug().render(html,path,req,options);
+  Future renderFromString(html,[path,req,options]) => new _Lug().render(html,path,req,options);
 
-  Future renderFile(path,[req,options]) {
+  Future render(path,[req,options]) {
   String fileName = path;
   if(options["templatePath"] != null){
     path = options["templatePath"] + path;
