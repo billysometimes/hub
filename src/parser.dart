@@ -134,7 +134,6 @@ class _Lug{
                             ".replaceAll(r'>', '&gt;')\n" +
                             ".replaceAll(r\"'\", '&#39;')\n" +
                             ".replaceAll('\"', '&quot;');\n" +
-                            "return html;\n"+
                              "}\n\n" +
                              "unsafe(str){\n" +
                              "return {\"unsafe\":str};"
