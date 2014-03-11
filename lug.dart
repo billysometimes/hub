@@ -11,6 +11,7 @@ class Lug{
   Future render(html,[path,req,options]) => new _Lug().render(html,path,req,options);
 
   Future renderFile(path,[req,options]) {
+  String fileName = path;
   if(options["templatePath"] != null){
     path = options["templatePath"] + path;
   }
@@ -20,6 +21,6 @@ class Lug{
     html = f.readAsStringSync(encoding: UTF8);
   else
     html = "";
-  return new _Lug().render(html,path,req,options);
+  return new _Lug().render(html,fileName,req,options);
   }
 }

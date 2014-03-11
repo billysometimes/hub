@@ -4,7 +4,7 @@ class _Lug{
 
   Map _options = Config.options;
 
-  Future render(String html, [String ogPath, Map req, Map options]){
+  Future render(String html, [String fileName, Map req, Map options]){
    if(options != null){
      options.forEach((k,v){
        _options[k] = v;
@@ -17,7 +17,7 @@ class _Lug{
    tokens.addAll(tokenize(html));
    tokens.add(WRITETAIL);
    String parsedHtml = tokens.join("");
-   String path = writeCache(parsedHtml,ogPath);
+   String path = writeCache(parsedHtml,fileName);
    Future<String> data = runIsolate(path,req);
    return data;
   }
@@ -76,13 +76,13 @@ class _Lug{
   }
 
   //TODO make this async
-  String writeCache(String fileData,String ogPath){
+  String writeCache(String fileData,String fileName){
     Directory cacheDir = new Directory(_options["cachePath"]);
     if(cacheDir.existsSync() == false){
       print("Cache directory did not exist, creating it.");
       cacheDir.createSync();
     }
-    File writeIt = new File("${cacheDir.path}${ogPath.split(".")[0]+'_cache'}.dart");
+    File writeIt = new File("${cacheDir.path+Platform.pathSeparator}${fileName+'_cache'}.dart");
     if (writeIt.existsSync()) {
       if(_options["cache"] == false){
         print("Cache file exists, but will be overwritten");
