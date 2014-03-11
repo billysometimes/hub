@@ -2,14 +2,10 @@ part of lug;
 
 class _Lug{
 
-  Map _options = Config.options;
+  Map _options = _Config.options;
 
-  Future render(String html, [String fileName, Map req, Map options]){
-   if(options != null){
-     options.forEach((k,v){
-       _options[k] = v;
-     });
-   }
+  Future render(String html, [String fileName, Map req]){
+
    List tokens = [WRITEHEAD];
    if(req != null){
      tokens.addAll(writeVars(req));
@@ -32,11 +28,11 @@ class _Lug{
     var i=0;
     html = html.replaceAll(new RegExp(r'\n+'), '\\n');
     while(i<html.length){
-      if(i+Config.LUG_OPEN_SYMBOL.length <= html.length && html.substring(i, i+Config.LUG_OPEN_SYMBOL.length) == Config.LUG_OPEN_SYMBOL){
+      if(i+_options["LUG_OPEN_SYMBOL"].length <= html.length && html.substring(i, i+_options["LUG_OPEN_SYMBOL"].length) == _options["LUG_OPEN_SYMBOL"]){
         if(inLug == true){
           throw new Exception("Cannot open lug tag inside of lug block");
         } else{
-          i += Config.LUG_OPEN_SYMBOL.length;
+          i += _options["LUG_OPEN_SYMBOL"].length;
           if(html[i] == "="){
             i++;
             doWrap = true;
@@ -46,7 +42,7 @@ class _Lug{
             buffer.add("buffer.add('${stringBuf}');\n");
           stringBuf = "";
         }
-      }else if(i+Config.LUG_CLOSE_SYMBOL.length <= html.length && html.substring(i, i+Config.LUG_CLOSE_SYMBOL.length) == Config.LUG_CLOSE_SYMBOL && inLug){
+      }else if(i+_options["LUG_CLOSE_SYMBOL"].length <= html.length && html.substring(i, i+_options["LUG_CLOSE_SYMBOL"].length) == _options["LUG_CLOSE_SYMBOL"] && inLug){
         inLug = false;
         if(doWrap){
           if(lugBuf.trim() != "")
@@ -57,7 +53,7 @@ class _Lug{
           if(lugBuf.trim() != "")
             buffer.add(lugBuf+"\n");
         lugBuf = "";
-        i += Config.LUG_CLOSE_SYMBOL.length;
+        i += _options["LUG_CLOSE_SYMBOL"].length;
       }else{
 
       if(inLug)

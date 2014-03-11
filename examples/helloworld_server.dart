@@ -7,8 +7,8 @@ main(){
      s.listen((HttpRequest request){
      Map params = request.uri.queryParameters;
      String path = request.uri.path.substring(1);
-     Lug lug = new Lug();
-     lug.render(path, params, {"cache":false}).then((res){
+     Lug lug = new Lug({"cache":false});
+     lug.render(path, params).then((res){
        request.response.write(res);
        request.response.close();
      });

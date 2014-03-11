@@ -8,19 +8,37 @@ part 'src/parser.dart';
 part 'src/config.dart';
 
 class Lug{
-  Future renderFromString(html,[path,req,options]) => new _Lug().render(html,path,req,options);
 
-  Future render(path,[req,options]) {
+  _Lug lug;
+
+  Lug([Map options]){
+    lug = new _Lug();
+    if(options != null)
+      options.forEach((k,v){
+        lug._options[k] = v;
+      });
+  }
+
+
+  Future render(path,[req]) {
+  Completer c = new Completer();
   String fileName = path;
-  if(options["templatePath"] != null){
-    path = options["templatePath"] + path;
+  if(lug._options["templatePath"] != null){
+    path = lug._options["templatePath"] + path;
   }
   File f = new File(path+".html.lug");
   String html;
-  if(f.existsSync())
+  if(f.existsSync()){
     html = f.readAsStringSync(encoding: UTF8);
+    c.complete(lug.render(html,fileName,req));
+  }
   else
-    html = "";
-  return new _Lug().render(html,fileName,req,options);
+    c.complete(new Exception("File Does not exist"));
+
+  return c.future;
+  }
+
+  Future renderFromString(html,[path,req]){
+    return lug.render(html,path,req);
   }
 }
