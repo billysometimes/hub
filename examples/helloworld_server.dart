@@ -1,4 +1,4 @@
-import '../bin/lug.dart' as Lug;
+import '../lug.dart';
 import 'dart:io';
 main(){
 
@@ -7,7 +7,8 @@ main(){
      s.listen((HttpRequest request){
      Map params = request.uri.queryParameters;
      String path = request.uri.path.substring(1);
-     Lug.renderFile(path, params, {"cache":false}).then((res){
+     Lug lug = new Lug();
+     lug.renderFile(path, params, {"cache":false}).then((res){
        request.response.write(res);
        request.response.close();
      });
