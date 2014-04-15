@@ -5,7 +5,7 @@ erb-like templates for dart
 
 This is pre-alpha, use at your own risk.
 
-See examples at https://github.com/billysometimes/lug/tree/master/examples for usage
+See examples at https://github.com/billysometimes/lug/tree/master/example for usage
 
 Scheduled improvements:
 - improve caching
