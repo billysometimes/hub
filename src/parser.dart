@@ -56,8 +56,25 @@ class _Lug{
         i += _options["LUG_CLOSE_SYMBOL"].length;
       }else{
 
-      if(inLug)
-        lugBuf += html[i];
+      if(inLug){
+        if(html.substring(i,i+_options["LUG_INCLUDE"].length) == _options["LUG_INCLUDE"]){
+          i+=_options["LUG_INCLUDE"].length;
+          var endInclude = html.substring(i).indexOf(_options["LUG_CLOSE_SYMBOL"]);
+          String fileName = html.substring(i,i+endInclude);
+          //TODO do this as one regex
+          fileName = fileName.replaceAll(new RegExp(r"\'"), "");
+          fileName = fileName.replaceAll(new RegExp('\"'), "");
+          fileName = fileName.replaceAll(new RegExp(r"\)"), "");
+          fileName = fileName.replaceAll(new RegExp(r"\("), "");
+          if(_options.containsKey("templatePath"))
+            fileName = _options["templatePath"]+"/$fileName";
+          buffer.addAll(tokenize(new File(fileName).readAsStringSync()));
+          i+=endInclude-1;
+
+        }else{
+          lugBuf += html[i];
+        }
+      }
       else
         stringBuf += html[i];
       i++;
