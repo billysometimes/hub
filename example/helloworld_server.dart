@@ -1,4 +1,4 @@
-import '../lug.dart';
+import 'package:lug/lug.dart';
 import 'dart:io';
 main(){
 

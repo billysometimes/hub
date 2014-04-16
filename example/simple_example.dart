@@ -1,4 +1,4 @@
-import '../lug.dart';
+import 'package:lug/lug.dart';
 
 main(){
   String path = "simple_example";
