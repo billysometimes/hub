@@ -135,11 +135,15 @@ class _Lug{
     return l;
   }
 
-  static String WRITEHEAD = "import 'dart:isolate';\n" +
+ static String WRITEHEAD = "import 'dart:isolate';\n" +
                             "main(List args,SendPort sendPort) {\n" +
-                            "  List buffer = [];\n";
+                            "  List buffer = [];\n" +
+                            "try {\n";
 
   static String WRITETAIL = "  sendPort.send(\"\${buffer.join('')}\");\n"+
+                            "}catch(e){\n"+
+                            "  sendPort.send(e.toString());\n" +
+                            "}\n\n"+
                             "}\n\n" +
                             "String escape(html){\n" +
                             "return html is Map ? html[\"unsafe\"] : html.toString().replaceAll(r'&', '&amp;')\n" +
