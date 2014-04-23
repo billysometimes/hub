@@ -26,7 +26,10 @@ class _Lug{
     bool doWrap = false;
 
     var i=0;
-    html = html.replaceAll(new RegExp(r'\n+'), '\\n');
+    if(Platform.isWindows)
+      html = html.replaceAll(new RegExp(r'\r\n+'), '\\n');
+    else
+      html = html.replaceAll(new RegExp(r'\n+'), '\\n');
     while(i<html.length){
       if(i+_options["LUG_OPEN_SYMBOL"].length <= html.length && html.substring(i, i+_options["LUG_OPEN_SYMBOL"].length) == _options["LUG_OPEN_SYMBOL"]){
         if(inLug == true){
@@ -121,8 +124,7 @@ class _Lug{
       c.complete(msg);
     });
 
-
-    Future<Isolate> templatizer = Isolate.spawnUri(Uri.parse(path), [req], receivePort.sendPort);
+    Future<Isolate> templatizer = Isolate.spawnUri(Uri.parse(Directory.current.path+Platform.pathSeparator+path), [req], receivePort.sendPort);
 
     return c.future;
   }

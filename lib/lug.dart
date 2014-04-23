@@ -24,8 +24,9 @@ class Lug{
   Completer c = new Completer();
   String fileName = path;
   if(lug._options["templatePath"] != null){
-    path = lug._options["templatePath"] + path;
+    path = lug._options["templatePath"] + Platform.pathSeparator+path;
   }
+
   File f = new File(path+".html.lug");
   String html;
   if(f.existsSync()){
