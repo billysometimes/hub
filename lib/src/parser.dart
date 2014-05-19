@@ -3,93 +3,86 @@ part of lug;
 class _Lug{
 
   Map _options = _Config.options;
-
+  List _imports = [];
+  Map _cache = {};
   Future render(String html, [String fileName, Map req]){
-
-   List tokens = [WRITEHEAD];
-   if(req != null){
-     tokens.addAll(writeVars(req));
+    String md5 = CryptoUtils.bytesToHex((new MD5()..add(html.codeUnits)).close());
+    String path;
+    if(md5 == _cache[fileName]){
+      try{
+        path = readCache(fileName);
+      }catch(exception){
+        path = writeNew(html,fileName,req);
+      }
+    }else{
+        path = writeNew(html,fileName,req);
    }
-   tokens.addAll(tokenize(html));
-   tokens.add(WRITETAIL);
-   String parsedHtml = tokens.join("");
-   String path = writeCache(parsedHtml,fileName);
+
    Future<String> data = runIsolate(path,req);
    return data;
   }
 
-  tokenize(String html){
-    List buffer = [];
-    String stringBuf = "";
-    String lugBuf = "";
-    bool inLug = false;
-    bool doWrap = false;
+  writeNew(html,fileName,req){
+    _cache[fileName] = CryptoUtils.bytesToHex((new MD5()..add(html.codeUnits)).close());
+    List tokens = [];
 
-    var i=0;
-    if(Platform.isWindows)
-      html = html.replaceAll(new RegExp(r'\r\n+'), '\\n');
-    else
-      html = html.replaceAll(new RegExp(r'\n+'), '\\n');
-    while(i<html.length){
-      if(i+_options["LUG_OPEN_SYMBOL"].length <= html.length && html.substring(i, i+_options["LUG_OPEN_SYMBOL"].length) == _options["LUG_OPEN_SYMBOL"]){
-        if(inLug == true){
-          throw new Exception("Cannot open lug tag inside of lug block");
-        } else{
-          i += _options["LUG_OPEN_SYMBOL"].length;
-          if(html[i] == "="){
-            i++;
-            doWrap = true;
-          }
-          inLug = true;
-          if(stringBuf.trim() != "")
-            buffer.add("buffer.add('${stringBuf}');\n");
-          stringBuf = "";
-        }
-      }else if(i+_options["LUG_CLOSE_SYMBOL"].length <= html.length && html.substring(i, i+_options["LUG_CLOSE_SYMBOL"].length) == _options["LUG_CLOSE_SYMBOL"] && inLug){
-        inLug = false;
-        if(doWrap){
-          if(lugBuf.trim() != "")
-            buffer.add("buffer.add(escape("+ lugBuf + "));\n");
-          doWrap = false;
-        }
-        else
-          if(lugBuf.trim() != "")
-            buffer.add(lugBuf+"\n");
-        lugBuf = "";
-        i += _options["LUG_CLOSE_SYMBOL"].length;
-      }else{
-
-      if(inLug){
-        if(html.substring(i,i+_options["LUG_INCLUDE"].length) == _options["LUG_INCLUDE"]){
-          i+=_options["LUG_INCLUDE"].length;
-          var endInclude = html.substring(i).indexOf(_options["LUG_CLOSE_SYMBOL"]);
-          String fileName = html.substring(i,i+endInclude);
-          //TODO do this as one regex
-          fileName = fileName.replaceAll(new RegExp(r"\'"), "");
-          fileName = fileName.replaceAll(new RegExp('\"'), "");
-          fileName = fileName.replaceAll(new RegExp(r"\)"), "");
-          fileName = fileName.replaceAll(new RegExp(r"\("), "");
-          if(_options.containsKey("templatePath"))
-            fileName = _options["templatePath"]+"/$fileName";
-          buffer.addAll(tokenize(new File(fileName).readAsStringSync()));
-          i+=endInclude-1;
-
-        }else{
-          lugBuf += html[i];
-        }
-      }
-      else
-        stringBuf += html[i];
-      i++;
-      }
+    tokens.add(WRITEHEAD);
+    if(req != null){
+      tokens.addAll(writeVars(req));
     }
-    if(stringBuf.trim() != "")
-      buffer.add("buffer.add('${stringBuf}');\n");
-    if(lugBuf.trim() != "")
-      throw new Exception("Unclosed lug tag");
+    tokens.addAll(tokenize(html));
+    tokens.add(WRITETAIL);
+    tokens.insertAll(0, _imports);
+    String parsedHtml = tokens.join("");
+    return writeCache(parsedHtml,fileName);
+  }
+  tokenize(String html){
+    var htmlcp = html;
+    List buffer = [];
+    var addToBuffer = false;
+    htmlcp = htmlcp.replaceAll(new RegExp('${_options["LUG_OPEN_SYMBOL"]}'), "LUGTAG"+_options["LUG_OPEN_SYMBOL"]);
+    htmlcp = htmlcp.replaceAll(new RegExp('${_options["LUG_CLOSE_SYMBOL"]}'), _options["LUG_CLOSE_SYMBOL"]+"LUGTAG");
+    htmlcp = htmlcp.replaceAll(r"'", r"\'");
 
+    if(Platform.isWindows)
+      htmlcp = htmlcp.replaceAll(new RegExp(r'\r\n+'), '\\n');
+    else
+      htmlcp = htmlcp.replaceAll(new RegExp(r'\n+'), '\\n');
+
+
+    List l = htmlcp.split("LUGTAG");
+    l.forEach((e){
+      if(!e.trim().startsWith(new RegExp('${_options["LUG_OPEN_SYMBOL"]}'))){
+        buffer.add("buffer.add('${e}');\n");
+      }else{
+        e = e.replaceAll(new RegExp('${_options["LUG_OPEN_SYMBOL"]}'), "");
+        e = e.replaceAll(new RegExp('${_options["LUG_CLOSE_SYMBOL"]}'), "");
+        if(e.startsWith(r'=')){
+          e = e.replaceFirst(r'=', "");
+          buffer.add("buffer.add(escape(");
+          buffer.add(e);
+          buffer.add("));\n");
+        }else if(e.trim().startsWith(_options["LUG_INCLUDE"])){
+           e = e.replaceAll(r"\'", '"');
+           var path = e.substring(e.indexOf('"')+1);
+           path = path.substring(0,path.indexOf('"'));
+           if(_options.containsKey("templatePath"))
+             path = _options["templatePath"]+Platform.pathSeparator+path;
+               buffer.addAll(tokenize(new File(path).readAsStringSync()));
+        }else if(e.trim().startsWith(_options["LUG_IMPORT"])){
+          e = e.replaceAll(r"\'", '"');
+          var path = e.substring(e.indexOf('"')+1);
+          path = path.substring(0,path.indexOf('"'));
+          _imports.add("import '$path';\n");
+        }else{
+          e = e.replaceAll("\\n", "\n");
+          buffer.add(e);
+        }
+      }
+    });
     return buffer;
   }
+
 
   //TODO make this async
   String writeCache(String fileData,String fileName){
@@ -99,22 +92,29 @@ class _Lug{
       cacheDir.createSync();
     }
     File writeIt = new File("${cacheDir.path+Platform.pathSeparator}${fileName+'_cache'}.dart");
-    if (writeIt.existsSync()) {
-      if(_options["cache"] == false){
-        print("Cache file exists, but will be overwritten");
-      }else{
-        print("Cache exists, using cache");
-        return writeIt.path;
-      }
-    }
-    else {
-     print("Cache file is being created");
-     writeIt.createSync(); //not currently implemented in trunk - manually create the file!
+    if (!writeIt.existsSync()) {
+      print("Cache file is being created");
+      writeIt.createSync();
     }
     writeIt.openSync();
     writeIt.writeAsStringSync(fileData, mode: FileMode.WRITE, encoding: UTF8, flush: true);
     return writeIt.path;
   }
+
+  String readCache(String fileName){
+    Directory cacheDir = new Directory(_options["cachePath"]);
+    if(cacheDir.existsSync() == false){
+      throw new Exception("cache does not exist");
+    }
+    File readIt = new File("${cacheDir.path+Platform.pathSeparator}${fileName+'_cache'}.dart");
+    if (readIt.existsSync()) {
+        print("Cache exists, using cache");
+        return readIt.path;
+      }else{
+        throw new Exception("File $fileName does not exist in cache directory.");
+      }
+    }
+
 
   Future runIsolate(String path, Map req){
     Completer c = new Completer();
@@ -123,8 +123,7 @@ class _Lug{
     receivePort.listen((msg){
       c.complete(msg);
     });
-
-    Future<Isolate> templatizer = Isolate.spawnUri(Uri.parse(Directory.current.path+Platform.pathSeparator+path), [req], receivePort.sendPort);
+    Future<Isolate> templatizer = Isolate.spawnUri(Uri.parse(path), [req], receivePort.sendPort);
 
     return c.future;
   }

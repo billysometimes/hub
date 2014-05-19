@@ -1,6 +1,7 @@
+<%import 'package:lug/lug.dart'%>
 <html>
   <%var t = 100;%>
-  <ul>
+  <ul onLoad="alertOnLoad('cool cats');">
     <%users.forEach((user){%>
       <li><%=user["name"]%></li>
     <%});%>
@@ -9,7 +10,17 @@
   <%if(2 == 2){%>
     <%=thatNum + t%>
   <%}%>
+  <%var i =0;
+   while(i<10){
+   i++;}%>
+   <%=i%>
   <%="<h1>NOT YELLING YELLING</h1>"%>
   <%=unsafe("<h1>YELLING</h1>")%>
-  <%include("include.html.lug")%>
+  <%include('include.html.lug')%>
+  
+  <script>
+    function alertOnLoad(msg){
+      alert(msg);
+    };
+  </script>
 </html>

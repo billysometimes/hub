@@ -8,10 +8,16 @@ main(){
      Map params = request.uri.queryParameters;
      String path = request.uri.path.substring(1);
      Lug lug = new Lug({"cache":false});
-     lug.render(path, params).then((res){
-       request.response.write(res);
-       request.response.close();
+     new File(path+".html.lug").exists().then((doesExist){
+         new File(path+".html.lug").readAsString().then((html){
+           lug.render(html,path, params).then((res){
+                  request.response.write(res);
+                  request.response.close();
+                });
+         });
+
      });
+
      });
   });
 }
