@@ -98,7 +98,7 @@ class _Lug{
     }
     writeIt.openSync();
     writeIt.writeAsStringSync(fileData, mode: FileMode.WRITE, encoding: UTF8, flush: true);
-    return writeIt.path;
+    return writeIt.absolute.path;
   }
 
   String readCache(String fileName){
@@ -123,6 +123,7 @@ class _Lug{
     receivePort.listen((msg){
       c.complete(msg);
     });
+    
     Future<Isolate> templatizer = Isolate.spawnUri(Uri.parse(path), [req], receivePort.sendPort);
 
     return c.future;
