@@ -109,7 +109,7 @@ class _Lug{
     File readIt = new File("${cacheDir.path+Platform.pathSeparator}${fileName+'_cache'}.dart");
     if (readIt.existsSync()) {
         print("Cache exists, using cache");
-        return readIt.path;
+        return readIt.absolute.path;
       }else{
         throw new Exception("File $fileName does not exist in cache directory.");
       }
