@@ -1,4 +1,4 @@
-part of lug;
+library lug.utils;
 
 
   String escape(html){

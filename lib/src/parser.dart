@@ -281,13 +281,14 @@ class _Lug{
   }
 
  static String WRITEHEAD = "import 'dart:isolate';\n" +
+                           "import 'import 'package:lug/utils.dart';\n" +
                             "main(List args,SendPort sendPort) {\n" +
                             "  List buffer = [];\n" +
-                            "try {\n";
+                            "  try {\n";
 
-  static String WRITETAIL = "}catch(e){\n"+
-                            "  sendPort.send(e.toString().codeUnits);\n" +
-                            "}\nfinally{sendPort.send(null);}\n"+
+  static String WRITETAIL = "  }catch(e){\n"+
+                            "    sendPort.send(e.toString().codeUnits);\n" +
+                            "  }\nfinally{sendPort.send(null);}\n"+
                             "}\n\n";
 
 }
