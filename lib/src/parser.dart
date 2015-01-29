@@ -3,10 +3,10 @@ part of lug;
 class _Lug{
 
   Map _options = _Config.options;
-  List _imports = [];
   Map _cache = {};
   
   Stream renderFile(File file,params,[imports=null]){
+    List _imports = [];
     StreamController sc = new StreamController();
     if(imports != null){
       imports.forEach((imprt){
@@ -23,7 +23,7 @@ class _Lug{
                  _runIsolate(targetPath,params,sc);
                }).catchError((Error){
                  //TODO log the error
-                 _writeNew(null, file,params).then((String targetPath){
+                 _writeNew(null, file,params,_imports).then((String targetPath){
                    _runIsolate(targetPath,params,sc);
                  });
                });
@@ -31,7 +31,7 @@ class _Lug{
       });
     }else{
       //file has not been cached or cache is out of date
-      _writeNew(null,file,params).then((String targetPath){
+      _writeNew(null,file,params,_imports).then((String targetPath){
         _runIsolate(targetPath,params,sc);
         file.lastModified().then((DateTime lastModified){
           _cache[file.path] = lastModified;  
@@ -42,6 +42,7 @@ class _Lug{
     
   }
   Stream render(String html, [String fileName, Map req,List imports]){
+    List _imports = [];
     StreamController sc = new StreamController();
 
     if(imports != null){
@@ -57,12 +58,12 @@ class _Lug{
         _runIsolate(targetPath,req,sc);
       }).catchError((Error){
         //TODO log the error
-        _writeNew(html, new File(fileName),req).then((String targetPath){
+        _writeNew(html, new File(fileName),req,_imports).then((String targetPath){
           _runIsolate(targetPath,req,sc);
         });
       });
     }else{
-      _writeNew(html, new File(fileName),req).then((String targetPath){
+      _writeNew(html, new File(fileName),req,_imports).then((String targetPath){
         _runIsolate(targetPath,req,sc);
       });
    }
@@ -70,7 +71,7 @@ class _Lug{
    return sc.stream;
   }
 
-  Future _writeNew(String html,File file,req){
+  Future _writeNew(String html,File file,req,imports){
     Completer<String> c = new Completer();
     _getWriteFile(file).then((File ff){
       IOSink writer = ff.openWrite();
@@ -83,12 +84,12 @@ class _Lug{
     List tokens = [];
 
     if(html != null){
-      tokens.addAll(_tokenize(html));
+      tokens.addAll(_tokenize(html,imports));
     }else{
-      tokens.addAll(_tokenize(file.readAsStringSync()));
+      tokens.addAll(_tokenize(file.readAsStringSync(),imports));
     }
-    for(int i=0;i<_imports.length; i++){
-      writer.add(_imports[i].codeUnits);
+    for(int i=0;i<imports.length; i++){
+      writer.add(imports[i].codeUnits);
     }
     writer.add(WRITEHEAD.codeUnits);
     
@@ -105,7 +106,7 @@ class _Lug{
     return c.future;
   }
   
-  List _tokenize(String html){
+  List _tokenize(String html,imports){
     var htmlcp = html;
     List buffer = [];
     var addToBuffer = false;
@@ -137,12 +138,12 @@ class _Lug{
            path = path.substring(0,path.indexOf('"'));
            if(_options.containsKey("templatePath"))
              path = _options["templatePath"]+Platform.pathSeparator+path;
-               buffer.addAll(_tokenize(new File(path).readAsStringSync()));
+               buffer.addAll(_tokenize(new File(path).readAsStringSync(),imports));
         }else if(e.trim().startsWith(_options["LUG_IMPORT"])){
           e = e.replaceAll(r"\'", '"');
           var path = e.substring(e.indexOf('"')+1);
           path = path.substring(0,path.indexOf('"'));
-          _imports.add("import '$path';\n");
+          imports.add("import '$path';\n");
         }else{
           e = e.replaceAll("\\n", "\n");
           buffer.add(e);

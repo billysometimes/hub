@@ -1,5 +1,5 @@
 name: lug
-version: 0.5.1
+version: 0.5.2
 author: Billy Welch <billywelch@gmail.com>
 description: Erb-style templates for dart
 homepage: https://github.com/billysometimes/lug
