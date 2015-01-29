@@ -41,7 +41,7 @@ class _Lug{
     return sc.stream;
     
   }
-  Stream render(String html, [String fileName, Map req,List imports]){
+  Stream render(String html, [String fileName, var req,List imports]){
     List _imports = [];
     StreamController sc = new StreamController();
 
@@ -71,7 +71,7 @@ class _Lug{
    return sc.stream;
   }
 
-  Future _writeNew(String html,File file,req,imports){
+  Future _writeNew(String html,File file,Map req,imports){
     Completer<String> c = new Completer();
     _getWriteFile(file).then((File ff){
       IOSink writer = ff.openWrite();
@@ -92,7 +92,7 @@ class _Lug{
       writer.add(imports[i].codeUnits);
     }
     writer.add(WRITEHEAD.codeUnits);
-    
+
     if(req != null){
       req.forEach((k,v){
         writer.add("var ${k} = args[0]['${k}'];\n".codeUnits);
