@@ -281,7 +281,7 @@ class _Lug{
   }
 
  static String WRITEHEAD = "import 'dart:isolate';\n" +
-                           "import 'import 'package:lug/utils.dart';\n" +
+                           "import 'package:lug/utils.dart';\n" +
                             "main(List args,SendPort sendPort) {\n" +
                             "  List buffer = [];\n" +
                             "  try {\n";
